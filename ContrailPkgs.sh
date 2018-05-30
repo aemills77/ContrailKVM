@@ -86,6 +86,10 @@ apt -qq list emacs | tee -a $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
 
+# writing to configuration files for environment
+
+echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
+
 echo "All installation logs written to ${INSTALL_LOG}"
 echo "INSTALLATION COMPLETED"
 
