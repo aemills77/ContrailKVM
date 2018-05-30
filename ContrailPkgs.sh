@@ -7,7 +7,8 @@
 # License: GPLv3
 
 # Usage: Execute without passing arguments, will update and install all required pakages.
-# Designed for usage on Ubuntu 14.04.5 LTS for Juniper Contrail CSO deployments.
+# Designed for usage on Ubuntu 14.04.5 LTS
+# Juniper Contrail CSO deployments - default username: juniper
 # Packages installed following: https://help/ubuntu.com/community/KVM/Installation
 
 # function declarations
@@ -88,7 +89,10 @@ apt -qq list ntp | tee -a $INSTALL_LOG
 
 # writing to configuration files for environment
 
-echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
+sudo chown juniper /etc/modprobe.d/qemu-system-x86.conf
+sudo echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
+
+sudo service libvirt-bin restart
 
 echo "All installation logs written to ${INSTALL_LOG}"
 echo "INSTALLATION COMPLETED"
