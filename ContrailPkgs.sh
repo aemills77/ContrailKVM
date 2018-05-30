@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
@@ -67,13 +67,24 @@ apt -qq list bridge-utils | tee -a $INSTALL_LOG
 
 # optional KVM GUI tool
 
-echo -n "Install optional virt-manager GUI tool? [Y/n]? "
-read OPTION
+read -p "Install optional virt-manager GUI tool? [Y/n]? " OPTION
 
 if [ ${OPTION,,} = "y" ] || [ ${OPTION,,} = "yes" ]; then
     installapt virt-manager $INSTALL_LOG
     apt -qq list virt-manager | tee -a $INSTALL_LOG
 fi
+
+# installs additional non-virtualization packages 
+
+installapt emacs $INSTALL_LOG
+installapt dnsmasq $INSTALL_LOG
+installapt ntp $INSTALL_LOG
+
+# validates packages are installed
+
+apt -qq list emacs | tee -a $INSTALL_LOG
+apt -qq list dnsmasq | tee -a $INSTALL_LOG
+apt -qq list ntp | tee -a $INSTALL_LOG
 
 echo "All installation logs written to ${INSTALL_LOG}"
 echo "INSTALLATION COMPLETED"
