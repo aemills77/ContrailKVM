@@ -101,7 +101,7 @@ echo -e
 sudo chown juniper /etc/modprobe.d/qemu-system-x86.conf
 sudo echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
 
-sudo service qemu-kvm restart
+sudo service libvirtd-bin restart
 
 echo -n "Nested KVM enabled: "
 cat /sys/module/kvm_intel/parameters/nested
