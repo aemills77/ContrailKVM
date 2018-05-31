@@ -2,8 +2,8 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 5.9.2018
-# Version: .3
+# Last Update: 5.31.2018
+# Version: .4
 # License: GPLv3
 
 # Usage: Execute without passing arguments, will update and install all required pakages.
