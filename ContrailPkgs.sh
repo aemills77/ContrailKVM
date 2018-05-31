@@ -51,9 +51,11 @@ fi
 echo -n "Downloading package list from repositories and updating... " | tee -a $INSTALL_LOG
 sudo apt-get --yes update >> $INSTALL_LOG
 echo "done."
+echo -e
 
 # installs required ubuntu virtualization packages
 
+echo "*** INSTALLING Virtualization Packages ***"
 installapt libvirt-bin $INSTALL_LOG
 installapt qemu-kvm $INSTALL_LOG
 installapt ubuntu-vm-builder $INSTALL_LOG
@@ -65,6 +67,7 @@ apt -qq list libvirt-bin | tee -a $INSTALL_LOG
 apt -qq list qemu-kvm | tee -a $INSTALL_LOG
 apt -qq list ubuntu-vm-builder | tee -a $INSTALL_LOG
 apt -qq list bridge-utils | tee -a $INSTALL_LOG
+echo -e
 
 # optional KVM GUI tool
 
@@ -74,9 +77,11 @@ if [ ${OPTION,,} = "y" ] || [ ${OPTION,,} = "yes" ]; then
     installapt virt-manager $INSTALL_LOG
     apt -qq list virt-manager | tee -a $INSTALL_LOG
 fi
+echo -e
 
 # installs additional non-virtualization packages 
 
+echo "*** INSTALLING Additional Packages ***"
 installapt emacs $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 installapt ntp $INSTALL_LOG
@@ -86,6 +91,7 @@ installapt ntp $INSTALL_LOG
 apt -qq list emacs | tee -a $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
+echo -e 
 
 # writing to configuration files for environment
 
