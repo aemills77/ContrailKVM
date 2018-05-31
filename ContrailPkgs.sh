@@ -6,10 +6,12 @@
 # Version: .4
 # License: GPLv3
 
-# Usage: Execute without passing arguments, will update and install all required pakages.
-# Designed for usage on Ubuntu 14.04.5 LTS
-# Juniper Contrail CSO deployments - default username: juniper
-# Packages installed following: https://help/ubuntu.com/community/KVM/Installation
+# Usage: Execute without passing arguments
+#
+# Designed for usage on Ubuntu 14.04.5 LTS for Juniper Contrail CSO
+# Assumed Default user account name: juniper
+# KVM Packages installed following:
+# https://help/ubuntu.com/community/KVM/Installation
 
 # function declarations
 
@@ -20,9 +22,10 @@ function installapt()
 
     echo "Installing ${APP}... "
     sudo apt-get --yes install $APP >> $LOG 
-    echo -e >> $LOG
+    echo -e >> $LOG  
     echo "done."
     
+    sleep 3
     return 0        # return installapt
 }   
 
@@ -98,7 +101,15 @@ echo -e
 sudo chown juniper /etc/modprobe.d/qemu-system-x86.conf
 sudo echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
 
-sudo service libvirt-bin restart
+sudo service qemu-kvm restart
+
+echo -n "Nested KVM enabled: "
+cat /sys/module/kvm_intel/parameters/nested
+echo -n "APICv Virtualization enabled: "
+cat /sys/module/kvm_intel/parameters/enable_apicv
+echo -n "Page Modification Logging enabled: "
+cat /sys/module/kvm_intel/parameters/pml
+echo -e
 
 echo "All installation logs written to ${INSTALL_LOG}"
 echo "INSTALLATION COMPLETED"
