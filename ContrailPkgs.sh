@@ -11,7 +11,7 @@
 # Designed for usage on Ubuntu 14.04.5 LTS for Juniper Contrail CSO
 # Assumed Default user account name: juniper
 # KVM Packages installed following:
-# https://help/ubuntu.com/community/KVM/Installation
+# https://help.ubuntu.com/community/KVM/Installation
 
 # function declarations
 
