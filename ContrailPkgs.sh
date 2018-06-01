@@ -2,7 +2,7 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 5.31.2018
+# Last Update: 06.01.2018
 # Version: .4
 # License: GPLv3
 
@@ -31,6 +31,7 @@ function installapt()
 
 # variable declarations
 
+SUDOER="juniper"
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
 CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
 
@@ -74,9 +75,9 @@ echo -e
 
 # optional KVM GUI tool
 
-read -p "Install optional virt-manager GUI tool? [Y/n]? " OPTION
+read -p "Install Optional virt-manager GUI tool? [Y/n]? " OPTION
 
-if [ ${OPTION,,} = "y" ] || [ ${OPTION,,} = "yes" ]; then
+if [ ${OPTION^^} = "Y" ] || [ ${OPTION^^} = "YES" ]; then
     installapt virt-manager $INSTALL_LOG
     apt -qq list virt-manager | tee -a $INSTALL_LOG
 fi
@@ -96,19 +97,25 @@ apt -qq list dnsmasq | tee -a $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
 echo -e 
 
-# writing to configuration files for environment
+# writing to configuration files for KVM environment
 
-sudo chown juniper /etc/modprobe.d/qemu-system-x86.conf
+sudo chown $SUDOER /etc/modprobe.d/qemu-system-x86.conf
 sudo echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
 
 sudo service libvirtd-bin restart
 
-echo -n "Nested KVM enabled: "
-cat /sys/module/kvm_intel/parameters/nested
-echo -n "APICv Virtualization enabled: "
-cat /sys/module/kvm_intel/parameters/enable_apicv
-echo -n "Page Modification Logging enabled: "
-cat /sys/module/kvm_intel/parameters/pml
+NEST=$(cat /sys/module/kvm_intel/parameters/nested)
+echo "Nested KVM enabled: ${NEST}" >> $INSTALL_LOG
+
+APIC=$(cat /sys/module/kvm_intel/parameters/enable_apicv)
+echo "APICv Virtualization enabled: ${APIC}" >> $INSTALL_LOG
+
+PLM=$(cat /sys/module/kvm_intel/parameters/pml)
+echo "Page Modification Logging enabled: ${PLM}" >> $INSTALL_LOG
+
+if [ ${NEST^^}="Y" ] && [ ${APIC^^}="N" ] && [ ${PLM^^}="N" ]; then
+   echo "KVM Environment Configuration: SUCCESSFUL" >> $INSTALL_LOG
+fi
 echo -e
 
 echo "All installation logs written to ${INSTALL_LOG}"
