@@ -1,0 +1,5 @@
+1. Add configuration for NTP server
+2. Set up virbr0 to match local server (make IP addresses configurable)
+3. Create bridge in KVM
+4. Create symlink for default.xml
+5. Validate if GUI is required for virt-manager and configure this as needed.
