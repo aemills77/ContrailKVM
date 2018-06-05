@@ -148,19 +148,19 @@ if [ ${OPTION^^} = "Y" ] || [ ${OPTION^^} = "YES" ]; then
 fi
 echo -e
 
-# configuring files for KVM environment
+# configures KVM environment
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
 
-# configuring NTP server
-echo "*** INSTALLING NTP Server ***" | tee -a $INSTALL_LOG
+# installs and configures NTP server
+echo "*** INSTALLING/CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
 installapt ntp $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
 
 confntp $MY_IP $INSTALL_LOG
 
-# configuring DNS server
-echo "*** INSTALLING DNS Server ***" | tee -a $INSTALL_LOG
+# installs and configures DNS server
+echo "*** INSTALLING/CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
 
