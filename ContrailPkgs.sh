@@ -2,7 +2,7 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 06.04.2018
+# Last Update: 06.05.2018
 # Version: .5
 # License: GPLv3
 
@@ -43,9 +43,9 @@ function virtenv()
     local APIC=$(cat /sys/module/kvm_intel/parameters/enable_apicv)
     local PLM=$(cat /sys/module/kvm_intel/parameters/pml)
 
-    echo "Nested Virtualization enabled: ${NEST}" >> $LOG
-    echo "APIC Virtualization enabled: ${APIC}" >> $LOG
-    echo "Page Modification Logging enabled: ${PLM}" >> $LOG
+    echo "Nested Virtualization enabled: ${NEST}" | tee -a $LOG
+    echo "APIC Virtualization enabled: ${APIC}" | tee -a $LOG
+    echo "Page Modification Logging enabled: ${PLM}" | tee -a $LOG
 
     if [ ${NEST^^}="Y" ] && [ ${APIC^^}="N" ] && [ ${PLM^^}="N" ]; then
         echo "KVM Environment Configuration: SUCCESSFUL" | tee -a $LOG
@@ -96,6 +96,20 @@ function confdns()
     echo -e
     
     return 0        # return confdns
+}
+
+function confbridge()
+{
+    local IP=$1     # local server IP address
+    local LOG=$2    # logfile
+    
+    # add edits to default.xml file HERE
+    
+    echo "*** CREATING Simlinks ***"
+    cd /etc/libvirt/qemu/networks/autostart
+    ln -s /etc/libvirt/qemu/networks/default.xml default.xml
+
+    return 0        # return confvirbr
 }
 
 # variable declarations
@@ -151,6 +165,7 @@ echo -e
 # configures KVM environment
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
+confbridge $MY_IP $INSTALL_LOG
 
 # installs and configures NTP server
 echo "*** INSTALLING/CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
