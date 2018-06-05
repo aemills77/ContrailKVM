@@ -2,8 +2,8 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 06.01.2018
-# Version: .4
+# Last Update: 06.04.2018
+# Version: .5
 # License: GPLv3
 
 # Usage: Execute without passing arguments
@@ -48,7 +48,7 @@ function virtenv()
     echo "Page Modification Logging enabled: ${PLM}" >> $LOG
 
     if [ ${NEST^^}="Y" ] && [ ${APIC^^}="N" ] && [ ${PLM^^}="N" ]; then
-        echo "KVM Environment Configuration: SUCCESSFUL" >> $LOG
+        echo "KVM Environment Configuration: SUCCESSFUL" | tee -a $LOG
     fi
     echo -e
 
@@ -57,10 +57,15 @@ function virtenv()
 
 function confntp()
 {
-    local LOG=$1
+    local IP=$1     # local server IP address
+    local LOG=$2    # logfile
 
-    sudo service ntpd restart
-    echo "NTP (ntpd) Server Configuration: SUCCESSFUL" >> $LOG
+    sudo sed -i -e "s/server 0.ubuntu.pool.ntp.org/ s/&/ iburst" /etc/ntp.conf
+    sudo sed -i -e "/server ntp.ubuntu.com/a server $IP" /etc/ntp.conf
+    
+    sudo service ntp restart
+    sudo ntpq >> $LOG
+    echo "NTP (ntpd) Server Configuration: SUCCESSFUL" | tee -a $LOG
     echo -e 
     
     return 0        # return confntp
@@ -72,7 +77,7 @@ function confdns()
     local LOG=$2    # logfile
     
     sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
-    echo "Original /etc/dnsmasq.conf backed up to /etc/dnsmasq.conf.orig" >> $LOG
+    echo "Original /etc/dnsmasq.conf backed up to /etc/dnsmasq.conf.orig" | tee -a $LOG
 
     sudo sed -i -e "s/#domain-needed/domain-needed/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#bogus-priv/bogus-priv/g" /etc/dnsmasq.conf
@@ -84,10 +89,10 @@ function confdns()
     sudo sed -i -e "s/#listen-address=/listen-address=$IP,127.0.0.1\n/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#no-hosts/no-hosts/g" /etc/dnsmasq.conf
     sudo sed -i -e "/#addn-hosts=/a addn-hosts=\/etc\/dnsmasq_static_hosts.conf" /etc/dnsmasq.conf
-    echo "DNS Configuration wrote to /etc/dnsmasq.conf" >> $LOG
+    echo "DNS Configuration wrote to /etc/dnsmasq.conf" | tee -a $LOG
 
     sudo service network-manager restart
-    echo "DNS (dnsmasq) Server Configuration: SUCCESSFUL" >> $LOG
+    echo "DNS (dnsmasq) Server Configuration: SUCCESSFUL" | tee -a $LOG
     echo -e
     
     return 0        # return confdns
@@ -124,7 +129,7 @@ echo -e
 
 # installs required ubuntu virtualization packages
 
-echo "*** INSTALLING Virtualization Packages ***"
+echo "*** INSTALLING Virtualization Packages ***" | tee -a $INSTALL_LOG
 installapt qemu-kvm $INSTALL_LOG
 installapt libvirt-bin $INSTALL_LOG
 installapt ubuntu-vm-builder $INSTALL_LOG
@@ -150,7 +155,7 @@ echo -e
 
 # installs additional non-virtualization packages 
 
-echo "*** INSTALLING Additional Packages ***"
+echo "*** INSTALLING Additional Packages ***" | tee -a $INSTALL_LOG
 installapt emacs $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 installapt ntp $INSTALL_LOG
@@ -164,19 +169,22 @@ echo -e
 
 # configuring files for KVM environment
 
+echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
 
 # configuring NTP server
 
-confntp $INSTALL_LOG
+echo "*** CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
+confntp $MY_IP $INSTALL_LOG
 
 # configuring DNS server
 
+echo "*** CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
 confdns $MY_IP $INSTALL_LOG
 
 # finalizing installation
 
-echo "All installation logs written to ${INSTALL_LOG}"
-echo "INSTALLATION COMPLETED"
+echo "All installation logs written to ${INSTALL_LOG}" | tee -a $INSTALL_LOG
+echo "INSTALLATION COMPLETED" | tee -a $INSTALL_LOG
 
 exit 0 # return ContrailPkgs.sh
