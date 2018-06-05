@@ -110,7 +110,6 @@ CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
 echo "CONTRAIL SERVER CONFIGURATION" | tee -a $INSTALL_LOG
 
 # validates that CPU supports hardware virtualization and 64 bit support
-
 sudo lscpu >> $INSTALL_LOG
 
 if [ $CPUSUPPORT -eq 0 ]; then
@@ -121,14 +120,12 @@ else
 fi
 
 # updates all currently installed packages
-
 echo -n "Downloading package list from repositories and updating... " | tee -a $INSTALL_LOG
 sudo apt-get --yes update >> $INSTALL_LOG
 echo "done."
 echo -e
 
 # installs required ubuntu virtualization packages
-
 echo "*** INSTALLING Virtualization Packages ***" | tee -a $INSTALL_LOG
 installapt qemu-kvm $INSTALL_LOG
 installapt libvirt-bin $INSTALL_LOG
@@ -136,7 +133,6 @@ installapt ubuntu-vm-builder $INSTALL_LOG
 installapt bridge-utils $INSTALL_LOG
 
 # validates packages are installed
-
 apt -qq list qemu-kvm | tee -a $INSTALL_LOG
 apt -qq list libvirt-bin | tee -a $INSTALL_LOG
 apt -qq list ubuntu-vm-builder | tee -a $INSTALL_LOG
@@ -144,7 +140,6 @@ apt -qq list bridge-utils | tee -a $INSTALL_LOG
 echo -e
 
 # optional KVM GUI tool
-
 read -p "Install Optional virt-manager GUI tool? [Y/n]? " OPTION
 
 if [ ${OPTION^^} = "Y" ] || [ ${OPTION^^} = "YES" ]; then
@@ -154,12 +149,10 @@ fi
 echo -e
 
 # configuring files for KVM environment
-
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
 
 # configuring NTP server
-
 echo "*** INSTALLING NTP Server ***" | tee -a $INSTALL_LOG
 installapt ntp $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
@@ -167,21 +160,18 @@ apt -qq list ntp | tee -a $INSTALL_LOG
 confntp $MY_IP $INSTALL_LOG
 
 # configuring DNS server
-
-echo "*** CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
+echo "*** INSTALLING DNS Server ***" | tee -a $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
 
 confdns $MY_IP $INSTALL_LOG
 
 # installs additional packages 
-
 echo "*** INSTALLING Additional Packages ***" | tee -a $INSTALL_LOG
 installapt emacs $INSTALL_LOG
 apt -qq list emacs | tee -a $INSTALL_LOG
 
 # finalizing installation
-
 echo "All installation logs written to ${INSTALL_LOG}" | tee -a $INSTALL_LOG
 echo "INSTALLATION COMPLETED" | tee -a $INSTALL_LOG
 
