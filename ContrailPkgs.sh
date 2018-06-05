@@ -153,20 +153,6 @@ if [ ${OPTION^^} = "Y" ] || [ ${OPTION^^} = "YES" ]; then
 fi
 echo -e
 
-# installs additional non-virtualization packages 
-
-echo "*** INSTALLING Additional Packages ***" | tee -a $INSTALL_LOG
-installapt emacs $INSTALL_LOG
-installapt dnsmasq $INSTALL_LOG
-installapt ntp $INSTALL_LOG
-
-# validates packages are installed
-
-apt -qq list emacs | tee -a $INSTALL_LOG
-apt -qq list dnsmasq | tee -a $INSTALL_LOG
-apt -qq list ntp | tee -a $INSTALL_LOG
-echo -e 
-
 # configuring files for KVM environment
 
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
@@ -174,13 +160,25 @@ virtenv $SUDOER $INSTALL_LOG
 
 # configuring NTP server
 
-echo "*** CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
+echo "*** INSTALLING NTP Server ***" | tee -a $INSTALL_LOG
+installapt ntp $INSTALL_LOG
+apt -qq list ntp | tee -a $INSTALL_LOG
+
 confntp $MY_IP $INSTALL_LOG
 
 # configuring DNS server
 
 echo "*** CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
+installapt dnsmasq $INSTALL_LOG
+apt -qq list dnsmasq | tee -a $INSTALL_LOG
+
 confdns $MY_IP $INSTALL_LOG
+
+# installs additional packages 
+
+echo "*** INSTALLING Additional Packages ***" | tee -a $INSTALL_LOG
+installapt emacs $INSTALL_LOG
+apt -qq list emacs | tee -a $INSTALL_LOG
 
 # finalizing installation
 
