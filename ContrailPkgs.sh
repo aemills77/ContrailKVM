@@ -2,7 +2,7 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 06.05.2018
+# Last Update: 06.06.2018
 # Version: .5
 # License: GPLv3
 
@@ -98,7 +98,7 @@ function confdns()
     return 0        # return confdns
 }
 
-function confbridge()
+function confbridge()file:///usr/share/doc/HTML/index.html
 {
     local IP=$1     # local server IP address
     local LOG=$2    # logfile
@@ -147,6 +147,7 @@ installapt ubuntu-vm-builder $INSTALL_LOG
 installapt bridge-utils $INSTALL_LOG
 
 # validates packages are installed
+echo "*** VERIFYING Packages Installations *** " | tee -a $INSTALL_LOG
 apt -qq list qemu-kvm | tee -a $INSTALL_LOG
 apt -qq list libvirt-bin | tee -a $INSTALL_LOG
 apt -qq list ubuntu-vm-builder | tee -a $INSTALL_LOG
