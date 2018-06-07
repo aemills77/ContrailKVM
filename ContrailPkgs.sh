@@ -98,7 +98,7 @@ function confdns()
     return 0        # return confdns
 }
 
-function confbridge()file:///usr/share/doc/HTML/index.html
+function confbridge()
 {
     local IP=$1     # local server IP address
     local LOG=$2    # logfile
@@ -117,9 +117,9 @@ SUDOER="juniper"
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
 CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
 
-IFACE=$(grep -A 10 "primary" /etc/network/interface | grep iface | cut -d' ' -f2)
-IPADDR=$(grep -A 10 "primary" /etc/network/interfaces | grep address | cut -d' ' -f2)
-MASK=$(grep -A 10 "primary" /etc/network/interfaces | grep netmask | cut -d' ' -f2)
+IFACE=$(grep -A 7 "primary" /etc/network/interface | grep iface | cut -d' ' -f2)
+IPADDR=$(grep -A 7 "primary" /etc/network/interfaces | grep address | cut -d' ' -f2)
+MASK=$(grep -A 7 "primary" /etc/network/interfaces | grep netmask | cut -d' ' -f2)
 
 # main ContrailPkgs.sh
 
@@ -136,7 +136,7 @@ else
 fi
 
 # updates all currently installed packages
-echo -n "Downloading package list from repositories and updating... " | tee -a $INSTALL_LOG
+echo "Downloading package list from repositories and updating... " | tee -a $INSTALL_LOG
 sudo apt-get --yes update >> $INSTALL_LOG
 echo "done."
 echo -e
