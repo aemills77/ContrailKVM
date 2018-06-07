@@ -113,7 +113,6 @@ function confbridge()file:///usr/share/doc/HTML/index.html
 }
 
 # variable declarations
-
 SUDOER="juniper"
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
 CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
@@ -175,14 +174,12 @@ confbridge $IPADDR $INSTALL_LOG
 echo "*** INSTALLING/CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
 installapt ntp $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
-
 confntp $IPADDR $INSTALL_LOG
 
 # installs and configures DNS server
 echo "*** INSTALLING/CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
-
 confdns $IPADDR $INSTALL_LOG
 
 # installs additional packages 
