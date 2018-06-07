@@ -3,7 +3,7 @@
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
 # Last Update: 06.07.2018
-# Version: .5
+# Version: .6
 # License: GPLv3
 
 # Usage: Execute without passing arguments
@@ -101,9 +101,32 @@ function confdns()
 function confbridge()
 {
     local IP=$1     # local server IP address
-    local LOG=$2    # logfile
+    local NMASK=$2  # local server network mask
+    local LOG=$3    # logfile
     
-    # add edits to default.xml file HERE
+    local IFACE=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep iface | cut -d' ' -f2) # primary network interface on server
+    local NWRK=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep network | cut -d' ' -f2) # network ID on primary interface
+    local BCAST=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep broadcast | cut -d' ' -f2) # broadcast address on primary interface
+    local GWAY=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep gateway | cut -d' ' -f2) # gateway address on primary interface
+    local DNSS=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep dns-search | cut -d' ' -f2) # DNS search address on primary interface
+    
+    # edits to /etc/network/interfaces file
+    sudo sed -i '/primary/,/^$/{//!d}' /etc/network/interfaces
+    sudo sed -i -e "/primary/a auto $IFACE\niface $IFACE inet manual\n\tup ifconfig $IFACE 0.0.0.0 up" /etc/network/interfaces
+    
+    sudo echo -e >> /etc/network/interfaces
+    sudo echo -e "# The virtual bridge network interface" >> /etc/network/interfaces
+    sudo echo -e "auto virbr0" >> /etc/network/interfaces
+    sudo echo -e "iface virbr0 inet static" >> /etc/network/interfaces
+    sudo echo -e "\tbridge_ports ${IFACE}" >> /etc/network/interfaces
+    sudo echo -e "\taddress ${IP}" >> /etc/network/interfaces
+    sudo echo -e "\tnetmask ${NMASK}" >> /etc/network/interfaces
+    sudo echo -e "\tnetwork ${NWRK}" >> /etc/network/interfaces
+    sudo echo -e "\tbroadcast ${BCAST}" >> /etc/network/interfaces
+    sudo echo -e "\tgateway ${GWAY}"  >> /etc/network/interfaces
+    sudo echo -e "\tdns-search ${DNSS}" >> /etc/network/interfaces
+    
+    # ADD EDITS TO default.xml FILE - HERE
     
     echo "*** CREATING Simlinks ***"
     cd /etc/libvirt/qemu/networks/autostart
@@ -114,12 +137,10 @@ function confbridge()
 
 # variable declarations
 SUDOER="juniper"
+IPADDR=$(sed -n '/primary/,/^$/{//!p}' interfaces | grep address | cut -d' ' -f2)
+NETMASK=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep netmask | cut -d' ' -f2)
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
 CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
-
-IFACE=$(grep -A 7 "primary" /etc/network/interface | grep iface | cut -d' ' -f2)
-IPADDR=$(grep -A 7 "primary" /etc/network/interfaces | grep address | cut -d' ' -f2)
-MASK=$(grep -A 7 "primary" /etc/network/interfaces | grep netmask | cut -d' ' -f2)
 
 # main ContrailPkgs.sh
 
@@ -168,7 +189,7 @@ echo -e
 # configures KVM environment
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
-confbridge $IPADDR $INSTALL_LOG
+confbridge $IPADDR $NETMASK $INSTALL_LOG
 
 # installs and configures NTP server
 echo "*** INSTALLING/CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
