@@ -2,7 +2,7 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 06.06.2018
+# Last Update: 06.07.2018
 # Version: .5
 # License: GPLv3
 
@@ -115,9 +115,12 @@ function confbridge()file:///usr/share/doc/HTML/index.html
 # variable declarations
 
 SUDOER="juniper"
-MY_IP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
 CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
+
+IFACE=$(grep -A 10 "primary" /etc/network/interface | grep iface | cut -d' ' -f2)
+IPADDR=$(grep -A 10 "primary" /etc/network/interfaces | grep address | cut -d' ' -f2)
+MASK=$(grep -A 10 "primary" /etc/network/interfaces | grep netmask | cut -d' ' -f2)
 
 # main ContrailPkgs.sh
 
@@ -166,21 +169,21 @@ echo -e
 # configures KVM environment
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
-confbridge $MY_IP $INSTALL_LOG
+confbridge $IPADDR $INSTALL_LOG
 
 # installs and configures NTP server
 echo "*** INSTALLING/CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
 installapt ntp $INSTALL_LOG
 apt -qq list ntp | tee -a $INSTALL_LOG
 
-confntp $MY_IP $INSTALL_LOG
+confntp $IPADDR $INSTALL_LOG
 
 # installs and configures DNS server
 echo "*** INSTALLING/CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
 
-confdns $MY_IP $INSTALL_LOG
+confdns $IPADDR $INSTALL_LOG
 
 # installs additional packages 
 echo "*** INSTALLING Additional Packages ***" | tee -a $INSTALL_LOG
