@@ -149,7 +149,7 @@ installapt ubuntu-vm-builder $INSTALL_LOG
 installapt bridge-utils $INSTALL_LOG
 
 # validates packages are installed
-echo "*** VERIFYING Packages Installations *** " | tee -a $INSTALL_LOG
+echo "*** VERIFYING Package Installs *** " | tee -a $INSTALL_LOG
 apt -qq list qemu-kvm | tee -a $INSTALL_LOG
 apt -qq list libvirt-bin | tee -a $INSTALL_LOG
 apt -qq list ubuntu-vm-builder | tee -a $INSTALL_LOG
