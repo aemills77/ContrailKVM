@@ -89,7 +89,10 @@ function confntp()
 function confdns()
 {
     local IP=$1     # local server IP address
-    local LOG=$2    # logfile
+    local PRIME=$2  # primary DNS server address
+    local SECOND=$3 # secondary DNS server address
+    local LDOM=$4   # local domain
+    local LOG=$5    # logfile
     
     sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
     echo "Original /etc/dnsmasq.conf backed up to /etc/dnsmasq.conf.orig" | tee -a $LOG
@@ -98,9 +101,8 @@ function confdns()
     sudo sed -i -e "s/#bogus-priv/bogus-priv/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#no-resolv/no-resolv/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#no-poll/no-poll/g" /etc/dnsmasq.conf
-    sudo sed -i -e "/#local=/a local=\/example.net\/" /etc/dnsmasq.conf
-    sudo sed -i -e "/#server=\/localnet\//a server=8.8.8.8" /etc/dnsmasq.conf
-    sudo sed -i -e "/server=8.8.8.8/a server=8.8.4.4" /etc/dnsmasq.conf
+    sudo sed -i -e "/#local=/a local=\/$LDOM\/" /etc/dnsmasq.conf
+    sudo sed -i -e "/#server=\/localnet\//a server=$PRIME\nserver=$SECOND" /etc/dnsmasq.conf
     sudo sed -i -e "s/#listen-address=/listen-address=$IP,127.0.0.1\n/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#no-hosts/no-hosts/g" /etc/dnsmasq.conf
     sudo sed -i -e "/#addn-hosts=/a addn-hosts=\/etc\/dnsmasq_static_hosts.conf" /etc/dnsmasq.conf
@@ -133,13 +135,13 @@ function confbridge()
     sudo echo -e "# The virtual bridge network interface" >> /etc/network/interfaces
     sudo echo -e "auto virbr0" >> /etc/network/interfaces
     sudo echo -e "iface virbr0 inet static" >> /etc/network/interfaces
-    sudo echo -e "\tbridge_ports ${IFACE}" >> /etc/network/interfaces
-    sudo echo -e "\taddress ${IP}" >> /etc/network/interfaces
-    sudo echo -e "\tnetmask ${NMASK}" >> /etc/network/interfaces
-    sudo echo -e "\tnetwork ${NWRK}" >> /etc/network/interfaces
-    sudo echo -e "\tbroadcast ${BCAST}" >> /etc/network/interfaces
-    sudo echo -e "\tgateway ${GWAY}"  >> /etc/network/interfaces
-    sudo echo -e "\tdns-search ${DNSS}" >> /etc/network/interfaces
+    sudo echo -e "\tbridge_ports $IFACE" >> /etc/network/interfaces
+    sudo echo -e "\taddress $IP" >> /etc/network/interfaces
+    sudo echo -e "\tnetmask $NMASK" >> /etc/network/interfaces
+    sudo echo -e "\tnetwork $NWRK" >> /etc/network/interfaces
+    sudo echo -e "\tbroadcast $BCAST" >> /etc/network/interfaces
+    sudo echo -e "\tgateway $GWAY"  >> /etc/network/interfaces
+    sudo echo -e "\tdns-search $DNSS" >> /etc/network/interfaces
     
     # ADD EDITS TO default.xml FILE - HERE
     
@@ -163,7 +165,7 @@ CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
 
 echo "CONTRAIL SERVER CONFIGURATION" | tee -a $INSTALL_LOG
 
-# validates that CPU supports hardware virtualization and 64 bit support
+# validates CPU supports hardware virtualization and 64 bit support
 sudo lscpu >> $INSTALL_LOG
 
 if [ $CPUSUPPORT -eq 0 ]; then
@@ -172,6 +174,38 @@ if [ $CPUSUPPORT -eq 0 ]; then
 else
     echo "Processor SUPPORTS virtualization: Installing..." | tee -a $INSTALL_LOG
 fi
+
+# prompt user to input environmental variables used in deployment
+echo "*** COLLECTING Environmental Variables ***"
+until [ ${PROMPT^^} = "Y" ] || [ ${PROMPT^^} = "YES" ]; do
+    PRIMARY="0"
+    SECONDARY="0"
+    DOMAIN="example.net"
+    until ipcheck $PRIMARY; do
+        read -p "Primary DNS (8.8.8.8): " PRIMARY
+        if [ -z "$PRIMARY" ]; then
+            PRIMARY="8.8.8.8"
+        fi
+    done
+    until ipcheck $SECONDARY; do
+        read -p "Secondary DNS (8.8.4.4): " SECONDARY
+        if [ -z "$SECONDARY" ]; then
+            SECONDARY="8.8.4.4"
+        fi        
+    done
+    read -p "Domain (example.net): " DOMAIN
+    if [ -z "$DOMAIN" ]; then
+        DOMAIN="example.net"
+    fi    
+    echo -e "Primary DNS:\t ${PRIMARY}"
+    echo -e "Secondary DNS:\t ${SECONDARY}"
+    echo -e "Domain:\t\t ${DOMAIN}"
+    read -p "Correct (y/n)? " PROMPT
+    if [ -z $PROMPT ]; then
+        PROMPT="N"
+    fi
+done
+echo -e
 
 # updates all currently installed packages
 echo "Downloading package list from repositories and updating... " | tee -a $INSTALL_LOG
@@ -218,7 +252,7 @@ confntp $IPADDR $INSTALL_LOG
 echo "*** INSTALLING/CONFIGURING DNS Server ***" | tee -a $INSTALL_LOG
 installapt dnsmasq $INSTALL_LOG
 apt -qq list dnsmasq | tee -a $INSTALL_LOG
-confdns $IPADDR $INSTALL_LOG
+confdns $IPADDR $PRIMARY $SECONDARY $DOMAIN $INSTALL_LOG
 
 # installs additional packages 
 echo "*** INSTALLING Additional Packages ***" | tee -a $INSTALL_LOG
