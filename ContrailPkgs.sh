@@ -38,7 +38,7 @@ function virtenv()
     sudo chown $SU /etc/modprobe.d/qemu-system-x86.conf
     sudo echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
 
-    sudo service libvirtd-bin restart
+    sudo service libvirt-bin restart
 
     local NEST=$(cat /sys/module/kvm_intel/parameters/nested)
     local APIC=$(cat /sys/module/kvm_intel/parameters/enable_apicv)
