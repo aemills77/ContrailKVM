@@ -7,9 +7,9 @@
 # License: GPLv3
 
 # Usage: Execute without passing arguments
-#
-# Designed for usage on Ubuntu 14.04.5 LTS for Juniper Contrail CSO
-# KVM Packages installed following:
+
+# Designed for Ubuntu 14.04.5 LTS deployment of Juniper Contrail CSO
+# KVM Packages installed following the guide on:
 # https://help.ubuntu.com/community/KVM/Installation
 
 # function declarations
