@@ -2,14 +2,13 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 06.07.2018
-# Version: .6
+# Last Update: 06.08.2018
+# Version: .7
 # License: GPLv3
 
 # Usage: Execute without passing arguments
 #
 # Designed for usage on Ubuntu 14.04.5 LTS for Juniper Contrail CSO
-# Assumed Default user account name: juniper
 # KVM Packages installed following:
 # https://help.ubuntu.com/community/KVM/Installation
 
@@ -28,6 +27,21 @@ function installapt()
     sleep 3
     return 0        # return installapt
 }   
+
+function ipcheck() 
+{
+    local ADDR=$1
+    
+    # regex to check for valid IP address (0-255.0-255.0-255.0-255)
+    if [[ "$ADDR" =~ ^([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$ ]]; then
+        # valid IP address
+        return 0
+    else
+        # invalid IP address
+        return 1
+    fi
+    # return ipcheck
+}
 
 function virtenv()
 {
