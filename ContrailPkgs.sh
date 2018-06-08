@@ -9,6 +9,7 @@
 # Usage: Execute without passing arguments
 
 # Designed for Ubuntu 14.04.5 LTS deployment of Juniper Contrail CSO
+# Assumes static networking is enabled; primary network interface is configured.
 # KVM Packages installed following the guide on:
 # https://help.ubuntu.com/community/KVM/Installation
 
@@ -149,6 +150,7 @@ function confbridge()
     sudo echo -e "\tdns-search $LDOM" >> /etc/network/interfaces
     
     # ADD EDITS TO default.xml FILE - HERE
+    # /etc/libvirt/qemu/networks/default.xml
     
     echo "*** CREATING Simlinks ***"
     cd /etc/libvirt/qemu/networks/autostart
