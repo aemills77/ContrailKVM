@@ -34,6 +34,7 @@ function virtenv()
     local SU=$1     # superuser username
     local LOG=$2    # logfile
 
+    sudo adduser $SU libvirtd
     sudo chown $SU /etc/modprobe.d/qemu-system-x86.conf
     sudo echo "options kvm-intel nested=y enable_apicv=n" >> /etc/modprobe.d/qemu-system-x86.conf
 
@@ -136,7 +137,7 @@ function confbridge()
 }
 
 # variable declarations
-SUDOER="juniper"
+SUDOER=$(id -un)
 IPADDR=$(sed -n '/primary/,/^$/{//!p}' interfaces | grep address | cut -d' ' -f2)
 NETMASK=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep netmask | cut -d' ' -f2)
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
