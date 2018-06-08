@@ -127,10 +127,12 @@ function confbridge()
     local GWAY=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep gateway | cut -d' ' -f2) # gateway address on primary interface
     local DNSS=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep dns-search | cut -d' ' -f2) # DNS search address on primary interface
     
-    # edits to /etc/network/interfaces file
+    # deletes primary interface configuration in /etc/network/interfaces file
     sudo sed -i '/primary/,/^$/{//!d}' /etc/network/interfaces
+    # assigns primary interface to logical bridge device
     sudo sed -i -e "/primary/a auto $IFACE\niface $IFACE inet manual\n\tup ifconfig $IFACE 0.0.0.0 up" /etc/network/interfaces
     
+    # creates virtual bridge interface using primary interface configuration
     sudo echo -e >> /etc/network/interfaces
     sudo echo -e "# The virtual bridge network interface" >> /etc/network/interfaces
     sudo echo -e "auto virbr0" >> /etc/network/interfaces
