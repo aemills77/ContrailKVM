@@ -119,13 +119,15 @@ function confbridge()
 {
     local IP=$1     # local server IP address
     local NMASK=$2  # local server network mask
-    local LOG=$3    # logfile
+    local PRIME=$3  # primary DNS server address
+    local SECOND=$4 # secondary DNS server address
+    local LDOM=$5   # local domain
+    local LOG=$6    # logfile
     
     local IFACE=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep iface | cut -d' ' -f2) # primary network interface on server
     local NWRK=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep network | cut -d' ' -f2) # network ID on primary interface
     local BCAST=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep broadcast | cut -d' ' -f2) # broadcast address on primary interface
     local GWAY=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep gateway | cut -d' ' -f2) # gateway address on primary interface
-    local DNSS=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep dns-search | cut -d' ' -f2) # DNS search address on primary interface
     
     # deletes primary interface configuration in /etc/network/interfaces file
     sudo sed -i '/primary/,/^$/{//!d}' /etc/network/interfaces
@@ -143,13 +145,16 @@ function confbridge()
     sudo echo -e "\tnetwork $NWRK" >> /etc/network/interfaces
     sudo echo -e "\tbroadcast $BCAST" >> /etc/network/interfaces
     sudo echo -e "\tgateway $GWAY"  >> /etc/network/interfaces
-    sudo echo -e "\tdns-search $DNSS" >> /etc/network/interfaces
+    sudo echo -e "\tdns-nameservers $PRIME $SECOND" >> /etc/network/interfaces
+    sudo echo -e "\tdns-search $LDOM" >> /etc/network/interfaces
     
     # ADD EDITS TO default.xml FILE - HERE
     
     echo "*** CREATING Simlinks ***"
     cd /etc/libvirt/qemu/networks/autostart
     ln -s /etc/libvirt/qemu/networks/default.xml default.xml
+    
+    sudo ifup virbr0
     echo "Bridge Interface Configuration: SUCCESSFUL" | tee -a $LOG
     echo -e
     
@@ -243,7 +248,7 @@ echo -e
 # configures KVM environment
 echo "*** CONFIGURING KVM Environment ***" | tee -a $INSTALL_LOG
 virtenv $SUDOER $INSTALL_LOG
-confbridge $IPADDR $NETMASK $INSTALL_LOG
+confbridge $IPADDR $NETMASK $PRIMARY $SECONDARY $DOMAIN $INSTALL_LOG
 
 # installs and configures NTP server
 echo "*** INSTALLING/CONFIGURING NTP Server ***" | tee -a $INSTALL_LOG
