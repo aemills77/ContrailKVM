@@ -147,6 +147,9 @@ function confbridge()
     cd /etc/libvirt/qemu/networks/autostart
     ln -s /etc/libvirt/qemu/networks/default.xml default.xml
 
+    echo "Bridge Interface Configuration: SUCCESSFUL" | tee -a $LOG
+    echo -e
+    
     return 0        # return confvirbr
 }
 
