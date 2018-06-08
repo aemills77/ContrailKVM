@@ -156,10 +156,11 @@ function confbridge()
 
 # variable declarations
 SUDOER=$(id -un)
-IPADDR=$(sed -n '/primary/,/^$/{//!p}' interfaces | grep address | cut -d' ' -f2)
+IPADDR=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep address | cut -d' ' -f2)
 NETMASK=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep netmask | cut -d' ' -f2)
 INSTALL_LOG="install.$(date +%H%M%S)_$(date +%m%d%Y).log"
 CPUSUPPORT=$(egrep -c '(vmx|svm)' /proc/cpuinfo)
+PROMPT="N"
 
 # main ContrailPkgs.sh
 
@@ -176,7 +177,7 @@ else
 fi
 
 # prompt user to input environmental variables used in deployment
-echo "*** COLLECTING Environmental Variables ***"
+echo "*** COLLECTING Environmental Variables ***" | tee -a $INSTALL_LOG
 until [ ${PROMPT^^} = "Y" ] || [ ${PROMPT^^} = "YES" ]; do
     PRIMARY="0"
     SECONDARY="0"
