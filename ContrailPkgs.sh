@@ -6,7 +6,7 @@
 # Version: .7
 # License: GPLv3
 
-# Usage: Execute without passing arguments
+# Usage: Execute without arguments (sudo /bin/bash ContrailPkgs.sh)
 
 # Designed for Ubuntu 14.04.5 LTS deployment of Juniper Contrail CSO
 # Assumes static networking is enabled; primary network interface is configured
@@ -193,7 +193,7 @@ else
     echo "Processor SUPPORTS virtualization: Installing..." | tee -a $INSTALL_LOG
 fi
 
-# prompt user to input environmental variables used in deployment
+# prompts user to input environmental variables used in deployment
 echo "*** COLLECTING Environmental Variables ***" | tee -a $INSTALL_LOG
 until [ ${PROMPT^^} = "Y" ] || [ ${PROMPT^^} = "YES" ]; do
     PRIMARY="0"
