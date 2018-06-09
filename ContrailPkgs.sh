@@ -2,7 +2,7 @@
 
 # ContrailPkgs.sh
 # Author: Arthur "Damon" Mills
-# Last Update: 06.08.2018
+# Last Update: 06.09.2018
 # Version: .7
 # License: GPLv3
 
@@ -146,7 +146,7 @@ function confbridge()
     sudo echo -e "\tnetwork $NWRK" >> /etc/network/interfaces
     sudo echo -e "\tbroadcast $BCAST" >> /etc/network/interfaces
     sudo echo -e "\tgateway $GWAY"  >> /etc/network/interfaces
-    sudo echo -e "\tdns-nameservers $PRIME $SECOND" >> /etc/network/interfaces
+    sudo echo -e "\tdns-nameservers $IP $PRIME $SECOND" >> /etc/network/interfaces
     sudo echo -e "\tdns-search $LDOM" >> /etc/network/interfaces
     
     # ADD EDITS TO default.xml FILE - HERE
