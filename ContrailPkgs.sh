@@ -9,7 +9,7 @@
 # Usage: Execute without passing arguments
 
 # Designed for Ubuntu 14.04.5 LTS deployment of Juniper Contrail CSO
-# Assumes static networking is enabled; primary network interface is configured.
+# Assumes static networking is enabled; primary network interface is configured
 # KVM Packages installed following the guide on:
 # https://help.ubuntu.com/community/KVM/Installation
 
@@ -79,6 +79,7 @@ function confntp()
     sudo sed -i -e "s/server 0.ubuntu.pool.ntp.org/ s/&/ iburst" /etc/ntp.conf
     sudo sed -i -e "/server ntp.ubuntu.com/a server $IP" /etc/ntp.conf
     
+    # restarts ntp service to initilize NTP server
     sudo service ntp restart
     sudo ntpq >> $LOG
     echo "NTP (ntpd) Server Configuration: SUCCESSFUL" | tee -a $LOG
@@ -95,9 +96,12 @@ function confdns()
     local LDOM=$4   # local domain
     local LOG=$5    # logfile
     
+    # creates a backup copy of /etc/dnsmasq.conf
     sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
     echo "Original /etc/dnsmasq.conf backed up to /etc/dnsmasq.conf.orig" | tee -a $LOG
 
+    # creates DNS server configuration 
+    # file: /etc/dnsmasq.conf
     sudo sed -i -e "s/#domain-needed/domain-needed/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#bogus-priv/bogus-priv/g" /etc/dnsmasq.conf
     sudo sed -i -e "s/#no-resolv/no-resolv/g" /etc/dnsmasq.conf
@@ -109,6 +113,7 @@ function confdns()
     sudo sed -i -e "/#addn-hosts=/a addn-hosts=\/etc\/dnsmasq_static_hosts.conf" /etc/dnsmasq.conf
     echo "DNS Configuration wrote to /etc/dnsmasq.conf" | tee -a $LOG
 
+    # restarts network-manager to initialize DNS server
     sudo service network-manager restart
     echo "DNS (dnsmasq) Server Configuration: SUCCESSFUL" | tee -a $LOG
     echo -e
@@ -130,12 +135,14 @@ function confbridge()
     local BCAST=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep broadcast | cut -d' ' -f2) # broadcast address on primary interface
     local GWAY=$(sed -n '/primary/,/^$/{//!p}' /etc/network/interfaces | grep gateway | cut -d' ' -f2) # gateway address on primary interface
     
-    # deletes primary interface configuration in /etc/network/interfaces file
+    # deletes primary interface configuration
+    # file: /etc/network/interfaces
     sudo sed -i '/primary/,/^$/{//!d}' /etc/network/interfaces
     # assigns primary interface to logical bridge device
     sudo sed -i -e "/primary/a auto $IFACE\niface $IFACE inet manual\n\tup ifconfig $IFACE 0.0.0.0 up" /etc/network/interfaces
     
-    # creates virtual bridge interface using primary interface configuration
+    # creates virtual bridge interface using primary interface
+    # file: /etc/network/interfaces
     sudo echo -e >> /etc/network/interfaces
     sudo echo -e "# The virtual bridge network interface" >> /etc/network/interfaces
     sudo echo -e "auto virbr0" >> /etc/network/interfaces
@@ -156,6 +163,7 @@ function confbridge()
     cd /etc/libvirt/qemu/networks/autostart
     ln -s /etc/libvirt/qemu/networks/default.xml default.xml
     
+    # brings virbr0 interface online
     sudo ifup virbr0
     echo "Bridge Interface Configuration: SUCCESSFUL" | tee -a $LOG
     echo -e
